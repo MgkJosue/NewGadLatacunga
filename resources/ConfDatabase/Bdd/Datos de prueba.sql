@@ -4,7 +4,6 @@ INSERT INTO csebase1 (login, nombre, apellido, clave) VALUES
 ('igalarza', 'Israel', 'Galarza', 'igalarza');
 ('admin', 'Israel', 'Galarza', 'admin');
 
-
 -- Insertar datos en la tabla aappbario (equivalente a aappruta)
 INSERT INTO aappbario (nombre) VALUES
 ('Ruta Norte'),
@@ -25,12 +24,11 @@ INSERT INTO vct002 (Nombre, Apellido, Direccion) VALUES
 ('Pedro', 'Sánchez', 'Calle Nueva 111');
 
 -- Insertar datos en la tabla aapplectorruta (nuevo formato)
--- No tengo información suficiente para rellenar todas las columnas. Por favor, verifica y ajusta según sea necesario.
 INSERT INTO aapplectorruta (anio, mes, ruta, fechatoma, fecha, login, lector) VALUES
-(2024, 1, 'Ruta Norte', '2024-01-01 00:00:00', '2024-01-01 00:00:00', 'usuario1', 'Lector 1'),
-(2024, 1, 'Ruta Este', '2024-01-01 00:00:00', '2024-01-01 00:00:00', 'usuario1', 'Lector 1'),
-(2024, 1, 'Ruta Sur', '2024-01-01 00:00:00', '2024-01-01 00:00:00', 'usuario2', 'Lector 2'),
-(2024, 1, 'Ruta Oeste', '2024-01-01 00:00:00', '2024-01-01 00:00:00', 'usuario2', 'Lector 2');
+(2024, 1, 'Ruta Norte', '2024-01-01 00:00:00', '2024-01-01 00:00:00', 'jalvarez', 'Lector 1'),
+(2024, 1, 'Ruta Este', '2024-01-01 00:00:00', '2024-01-01 00:00:00', 'jalvarez', 'Lector 1'),
+(2024, 1, 'Ruta Sur', '2024-01-01 00:00:00', '2024-01-01 00:00:00', 'igalarza', 'Lector 2'),
+(2024, 1, 'Ruta Oeste', '2024-01-01 00:00:00', '2024-01-01 00:00:00', 'igalarza', 'Lector 2');
 
 -- Insertar datos en la tabla aappcometidas (equivalente a acometidas)
 INSERT INTO aappcometidas (numcuenta, no_medidor, clave, ruta, direccion) VALUES

@@ -63,7 +63,7 @@ CREATE TABLE aapplectura (
 
 --TABLAS LOCALES NO ESTAN EN EL MUNICIPIO
 -- Crear la tabla aapMovilLectura 
-CREATE TABLE aapMovilLectura (
+CREATE TABLE aappMovilLectura (
     id SERIAL PRIMARY KEY,
     cuenta VARCHAR(20),
     medidor VARCHAR(20),
@@ -81,7 +81,7 @@ CREATE TABLE aapMovilLectura (
 
 
 -- Crear la tabla aapEvidencia para la actualización de los datos de la tabla aapMovilLectura 
-CREATE TABLE aapEvidencia (
+CREATE TABLE aappEvidencia (
     id SERIAL PRIMARY KEY,
     cuenta VARCHAR(20),
     medidor VARCHAR(20),

@@ -7,7 +7,7 @@ class LoginCredentials(BaseModel):
 
 class UsuarioRutaResult(BaseModel):
     nombre_ruta: str
-    nombre_usuario: str
+    login: str
     id_usuario: int
     id_ruta: int
 
