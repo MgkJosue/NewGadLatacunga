@@ -57,7 +57,7 @@ INSERT INTO aapplectura (numcuenta, anio, mes, lectura, observacion, lecturaante
 ('13579', 2024, 2, 260, 'Sin observaciones', 250, 10, 'M13579', 6);
 
 -- Insertar datos en la tabla aapMovilLectura (igual que antes)
-INSERT INTO aapMovilLectura (cuenta, medidor, clave, abonado, lectura, observacion, coordenadasXYZ, direccion) VALUES
+INSERT INTO aappMovilLectura (cuenta, medidor, clave, abonado, lectura, observacion, coordenadasXYZ, direccion) VALUES
 ('12345', 'M12345', 'CLAVE123', 'Juan Pérez', '1234', 'Sin novedad', '-0.945758,-78.619934,2850', 'Calle Principal 123'),
 ('67890', 'M67890', 'CLAVE678', 'María Gómez', '5678', 'Fuga detectada', '-0.945758,-78.619934,2850', 'Avenida Central 456'),
 ('54321', 'M54321', 'CLAVE543', 'Carlos Rodríguez', '9012', 'Sin novedad', '-0.945758,-78.619934,2850', 'Calle Secundaria 789'),

@@ -10,14 +10,8 @@ import os
 
 router = APIRouter()
 
-def leer_y_convertir_imagen(imagen_ruta):
-    if imagen_ruta and os.path.isfile(imagen_ruta):
-        with open(imagen_ruta, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode('utf-8')
-    return None
-
-@router.post("/sincronizar_lecturas/{usuario_id}")
-async def sincronizar_lecturas(usuario_id: int, lecturas: List[Lectura], current_user: dict = Depends(get_current_user)):
+@router.post("/sincronizar_lecturas/{login}")
+async def sincronizar_lecturas(login: str, lecturas: List[Lectura], current_user: dict = Depends(get_current_user)):
     try:
         formatted_lecturas = []
         for lectura in lecturas:
@@ -28,9 +22,12 @@ async def sincronizar_lecturas(usuario_id: int, lecturas: List[Lectura], current
                 imagen = f"decode('{imagen_base64}', 'base64')"
             else:
                 imagen = 'NULL'
+            
+            fecha_actualizacion = f"'{lectura.fecha_actualizacion}'" if lectura.fecha_actualizacion is not None else 'NULL'
+            
             formatted_lecturas.append(
                 f"ROW('{lectura.numcuenta}', '{lectura.no_medidor}', '{lectura.clave}', '{lectura.lectura}', "
-                f"'{lectura.observacion}', '{lectura.coordenadas}', {motivo}, {imagen})::tipo_lectura"
+                f"'{lectura.observacion}', '{lectura.coordenadas}', {motivo}, {imagen}, {fecha_actualizacion})::tipo_lectura"
             )
         
         query = text(f"""
@@ -39,7 +36,7 @@ async def sincronizar_lecturas(usuario_id: int, lecturas: List[Lectura], current
             lecturas tipo_lectura[];
         BEGIN
             lecturas := ARRAY[{", ".join(formatted_lecturas)}];
-            CALL SincronizarLecturasMasivas({usuario_id}, lecturas);
+            CALL SincronizarLecturasMasivas('{login}', lecturas);
         END $$;
         """)
 
@@ -61,3 +58,10 @@ async def copiar_evidencia(current_user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
         ) from e
+    
+
+def leer_y_convertir_imagen(imagen_ruta):
+    if imagen_ruta and os.path.isfile(imagen_ruta):
+        with open(imagen_ruta, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode('utf-8')
+    return None

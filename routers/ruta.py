@@ -7,11 +7,11 @@ from routers.auth import get_current_user
 
 router = APIRouter()
 
-@router.get("/ruta_lectura/{usuario_id}", response_model=list[RutaLecturaMovilResult])
-async def obtener_ruta_lectura(usuario_id: int, current_user: dict = Depends(get_current_user)):
+@router.get("/ruta_lectura/{login}", response_model=list[RutaLecturaMovilResult])
+async def obtener_ruta_lectura(login: str, current_user: dict = Depends(get_current_user)):
     try:
-        query = text("SELECT * FROM RutaLecturaMovil(:usuario_id)").bindparams(
-            bindparam("usuario_id", usuario_id)
+        query = text("SELECT * FROM RutaLecturaMovil(:login)").bindparams(
+            bindparam("login", login)
         )
         result = await database.fetch_all(query)
         if not result:
@@ -20,7 +20,7 @@ async def obtener_ruta_lectura(usuario_id: int, current_user: dict = Depends(get
     except SQLAlchemyError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
-        ) from e 
+        ) from e
 
 
 @router.get("/obtenerRutas/")

@@ -76,7 +76,7 @@ CREATE TABLE aappMovilLectura (
     motivo TEXT,
     imagen BYTEA,
     fecha_hora_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_hora_edicion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_hora_edicion TIMESTAMP 
 );
 
 
@@ -93,6 +93,7 @@ CREATE TABLE aappEvidencia (
     direccion VARCHAR(255),
     motivo TEXT,
     imagen BYTEA,
-    fecha_hora_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_hora_edicion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_hora_registro TIMESTAMP ,
+    fecha_hora_edicion TIMESTAMP,
+    CONSTRAINT unique_cuenta_medidor UNIQUE (cuenta, medidor)
 );

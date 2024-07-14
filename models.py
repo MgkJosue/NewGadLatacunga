@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 
 class LoginCredentials(BaseModel):
     nombre_usuario: str
@@ -25,11 +26,12 @@ class Lectura(BaseModel):
     numcuenta: str
     no_medidor: str
     clave: str
-    lectura: Optional[str] = None 
+    lectura: Optional[str] = None
     observacion: str
     coordenadas: str
-    motivo: Optional[str] = None 
+    motivo: Optional[str] = None
     imagen_ruta: Optional[str] = None
+    fecha_actualizacion: Optional[datetime] = None 
 
 class Token(BaseModel):
     access_token: str

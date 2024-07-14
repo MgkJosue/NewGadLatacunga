@@ -7,7 +7,7 @@ SELECT * FROM UsuarioRuta(1);
 
 --Probar SpRutaLecturaMovilz
 -- Obtener informacion de acometidas relacionadas con id del usuario
-SELECT * FROM RutaLecturaMovil(1);
+SELECT * FROM RutaLecturaMovil('jalvarez');
 
 --Probar spSincronizarLecturas
 -- Probar SincronizarLecturasMasivas
@@ -27,7 +27,7 @@ BEGIN
       --  ROW('54321', 'M54321', 'CLAVE543', '700', 'Observación de prueba 3', '-78.5243, -0.2293, 1234', 'Motivo de prueba 2', pg_read_binary_file('/ruta/a/la/imagen.png'))::tipo_lectura
     ];
 
-    CALL SincronizarLecturasMasivas(1, lecturas);
+    CALL SincronizarLecturasMasivas('jalvarez', lecturas);
 END $$;
 
 
