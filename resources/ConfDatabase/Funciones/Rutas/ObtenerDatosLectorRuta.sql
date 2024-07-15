@@ -1,7 +1,6 @@
 -- Función para obtener los datos de lectorruta
 CREATE OR REPLACE FUNCTION obtener_datos_lectorruta()
 RETURNS TABLE(
-    id_lectorruta INT,
     login_usuario VARCHAR,
     nombre_usuario VARCHAR,
     id_ruta INT,
@@ -10,9 +9,8 @@ RETURNS TABLE(
 BEGIN
     RETURN QUERY
     SELECT 
-        ROW_NUMBER() OVER () AS id_lectorruta,  -- Genera un ID secuencial para cada fila
         cl.login AS login_usuario,
-        cl.nombre AS nombre_usuario,
+        (cl.nombre || ' ' || cl.apellido)::VARCHAR AS nombre_usuario,  -- Concatena nombre y apellido y convierte a VARCHAR
         ar.id AS id_ruta,
         ar.nombre AS nombre_ruta
     FROM 

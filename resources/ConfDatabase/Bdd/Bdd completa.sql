@@ -2,7 +2,6 @@
 
 -- Crear la nueva tabla csebase1 HACE REFERENCIA A LA TABLA USUARIOS
 CREATE TABLE csebase1 (
-    id SERIAL PRIMARY KEY,
     login VARCHAR(255) UNIQUE NOT NULL,
     nombre VARCHAR(255) NOT NULL,
     apellido VARCHAR(255) NOT NULL,
