@@ -264,7 +264,7 @@ END;
 $$;
 
 
-=CREATE OR REPLACE FUNCTION actualizar_lectorruta(
+CREATE OR REPLACE FUNCTION actualizar_lectorruta(
     p_login VARCHAR,
     p_idruta INT,
     new_login VARCHAR,
