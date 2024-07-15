@@ -33,15 +33,21 @@ async def obtener_rutas(current_user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
         ) from e
+    
+@router.get("/lectorruta")
+async def obtener_lectorruta(current_user: dict = Depends(get_current_user)):
+    query = "SELECT * FROM obtener_datos_lectorruta();"
+    results = await database.fetch_all(query)
+    return results
 
 @router.post("/asignarRuta/")
 async def asignar_ruta_a_usuario(asignacion: AsignarRuta, current_user: dict = Depends(get_current_user)):
     try:
         query = text("""
-            SELECT AsignarRutaAUsuario(:usuario_id, :ruta_id) AS mensaje;
+            SELECT AsignarRutaAUsuario(:username, :ruta_id) AS mensaje;
         """).bindparams(
             bindparam("ruta_id", asignacion.ruta_id),
-            bindparam("usuario_id", asignacion.usuario_id)
+            bindparam("username", asignacion.username)
         )
         
         result = await database.fetch_one(query)
@@ -58,11 +64,7 @@ async def asignar_ruta_a_usuario(asignacion: AsignarRuta, current_user: dict = D
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
         ) from e
     
-@router.get("/lectorruta")
-async def obtener_lectorruta(current_user: dict = Depends(get_current_user)):
-    query = "SELECT * FROM obtener_datos_lectorruta();"
-    results = await database.fetch_all(query)
-    return results
+
 
 @router.delete("/lectorruta/{id}")
 async def eliminar_lectorruta(id: int, current_user: dict = Depends(get_current_user)):
