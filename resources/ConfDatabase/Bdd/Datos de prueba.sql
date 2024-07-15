@@ -1,7 +1,7 @@
 -- Insertar datos en la tabla csebase1 (equivalente a usuarios)
 INSERT INTO csebase1 (login, nombre, apellido, clave) VALUES
 ('jalvarez', 'Josue', 'Alvarez', 'jalvarez'),
-('igalarza', 'Israel', 'Galarza', 'igalarza');
+('igalarza', 'Israel', 'Galarza', 'igalarza'),
 ('admin', 'Israel', 'Galarza', 'admin');
 
 -- Insertar datos en la tabla aappbario (equivalente a aappruta)

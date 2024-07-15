@@ -39,18 +39,17 @@ class Token(BaseModel):
     username: str 
 
 
-class AsignarRuta(BaseModel):
+class Ruta(BaseModel):
     ruta_id: int
     username: str
 
-
 class LectorRutaDetail(BaseModel):
-    id: int
-    idusuario: int
-    idruta: int
+    login_usuario: str
     nombre_usuario: str
+    id_ruta: int
     nombre_ruta: str
 
+
 class ActualizarLectorRuta(BaseModel):
-    usuario_id: int
-    ruta_id: int
+    new_username: str
+    new_id_ruta: int

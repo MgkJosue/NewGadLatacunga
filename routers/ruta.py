@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import text, bindparam
 from sqlalchemy.exc import SQLAlchemyError
 from database import database
-from models import RutaLecturaMovilResult, AsignarRuta, LectorRutaDetail, ActualizarLectorRuta
+from models import RutaLecturaMovilResult, Ruta, LectorRutaDetail, ActualizarLectorRuta
 from routers.auth import get_current_user
 
 router = APIRouter()
@@ -41,7 +41,7 @@ async def obtener_lectorruta(current_user: dict = Depends(get_current_user)):
     return results
 
 @router.post("/asignarRuta/")
-async def asignar_ruta_a_usuario(asignacion: AsignarRuta, current_user: dict = Depends(get_current_user)):
+async def asignar_ruta_a_usuario(asignacion: Ruta, current_user: dict = Depends(get_current_user)):
     try:
         query = text("""
             SELECT AsignarRutaAUsuario(:username, :ruta_id) AS mensaje;
@@ -65,47 +65,52 @@ async def asignar_ruta_a_usuario(asignacion: AsignarRuta, current_user: dict = D
         ) from e
     
 
-
-@router.delete("/lectorruta/{id}")
-async def eliminar_lectorruta(id: int, current_user: dict = Depends(get_current_user)):
+@router.get("/lectorruta/{username}/{id_ruta}", response_model=LectorRutaDetail)
+async def get_lectorruta(username: str, id_ruta: int, current_user: dict = Depends(get_current_user)):
     try:
-        query = f"SELECT eliminar_lectorruta({id});"
-        await database.execute(query)
-        return {"message": f"Lectorruta con ID {id} eliminada"}
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    
-
-@router.get("/lectorruta/{id}", response_model=LectorRutaDetail)
-async def get_lectorruta(id: int, current_user: dict = Depends(get_current_user)):
-    try:
-        query = text("SELECT * FROM obtener_lectorruta(:id)").bindparams(
-            bindparam("id", id)
+        query = text("SELECT * FROM obtener_lectorruta(:username, :id_ruta)").bindparams(
+            bindparam("username", username),
+            bindparam("id_ruta", id_ruta)
         )
         result = await database.fetch_one(query)
         if not result:
             raise HTTPException(status_code=404, detail="Lector-Ruta no encontrado")
         return LectorRutaDetail(
-            id=result["id"],
-            idusuario=result["idusuario"],
-            idruta=result["idruta"],
+            login_usuario=result["login_usuario"],
             nombre_usuario=result["nombre_usuario"],
+            id_ruta=result["id_ruta"],
             nombre_ruta=result["nombre_ruta"]
         )
     except SQLAlchemyError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
         ) from e
+    
 
-@router.put("/lectorruta/{id}", response_model=dict)
-async def actualizar_lectorruta(id: int, detalles: ActualizarLectorRuta, current_user: dict = Depends(get_current_user)):
+
+@router.delete("/lectorruta/{username}/{id_ruta}")
+async def eliminar_lectorruta(username: str, id_ruta: int, current_user: dict = Depends(get_current_user)):
+    try:
+        query = text("SELECT eliminar_lectorruta(:username, :id_ruta)").bindparams(
+            bindparam("username", username),
+            bindparam("id_ruta", id_ruta)
+        )
+        await database.execute(query)
+        return {"message": f"Lectorruta con login {username} y ID de ruta {id_ruta} eliminada"}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+
+@router.put("/lectorruta/{username}/{id_ruta}", response_model=dict)
+async def actualizar_lectorruta(username: str, id_ruta: int, detalles: ActualizarLectorRuta, current_user: dict = Depends(get_current_user)):
     try:
         query = text("""
-            SELECT ActualizarLectorRuta(:id, :usuario_id, :ruta_id) AS mensaje;
+            SELECT actualizar_lectorruta(:username, :id_ruta, :new_username, :new_id_ruta) AS mensaje;
         """).bindparams(
-            bindparam("id", id),
-            bindparam("usuario_id", detalles.usuario_id),
-            bindparam("ruta_id", detalles.ruta_id)
+            bindparam("username", username),
+            bindparam("id_ruta", id_ruta),
+            bindparam("new_username", detalles.new_username),
+            bindparam("new_id_ruta", detalles.new_id_ruta)
         )
         
         result = await database.fetch_one(query)
