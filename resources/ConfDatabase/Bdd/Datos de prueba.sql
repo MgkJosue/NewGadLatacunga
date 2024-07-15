@@ -64,5 +64,10 @@ INSERT INTO aappMovilLectura (cuenta, medidor, clave, abonado, lectura, observac
 ('98765', 'M98765', 'CLAVE987', 'Ana López', '3456', 'Medidor dañado', '-0.945758,-78.619934,2850', 'Avenida Libertad 101'),
 ('24680', 'M24680', 'CLAVE246', 'Luis Martínez', '7890', 'Sin novedad', '-0.945758,-78.619934,2850', 'Plaza Mayor 222'),
 ('13579', 'M13579', 'CLAVE135', 'Laura Sánchez', '2345', 'Sin novedad', '-0.945758,-78.619934,2850', 'Calle Rural 333'),
-('11111', 'M11111', 'CLAVE111', 'Pedro Sánchez', '1000', 'Nueva lectura', '-0.945758,-78.619934,2850', 'Calle Nueva 111');
+('11111', 'M11111', 'CLAVE111', 'Pedro Sánchez', '1000', 'Nueva lectura', '-0.945758,-78.619934,2850', 'Calle Nueva 111'); --no esta en la tabla aapplectura
 
+
+-- Insertar nuevos registros en la tabla aapMovilLectura
+INSERT INTO aappMovilLectura (cuenta, medidor, clave, abonado, lectura, observacion, coordenadasXYZ, direccion) VALUES
+('22222', 'M22222', 'CLAVE222', 'Pedro Sánchez', '4567', 'Sin novedad', '-0.123456,-78.654321,1500', 'Calle Nueva 222'),
+('33333', 'M33333', 'CLAVE333', 'Juan Pérez', '7890', 'Lectura alta', '-0.654321,-78.123456,1500', 'Calle Principal 789');

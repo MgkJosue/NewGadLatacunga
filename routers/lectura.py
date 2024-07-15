@@ -58,7 +58,25 @@ async def copiar_evidencia(current_user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
         ) from e
-    
+
+
+@router.post("/actualizar_lecturas")
+async def actualizar_lecturas(current_user: dict = Depends(get_current_user)):
+    try:
+        # Crear tablas temporales
+        query_crear_tablas_temporales = text("SELECT crear_tablas_temporales();")
+        await database.execute(query_crear_tablas_temporales)
+        
+        # Actualizar e insertar lecturas
+        query_actualizar_insertar_lecturas = text("SELECT actualizar_insertar_lecturas();")
+        await database.execute(query_actualizar_insertar_lecturas)
+        
+        return {"mensaje": "Lecturas actualizadas e insertadas exitosamente"}
+    except SQLAlchemyError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
+        ) from e
+
 
 def leer_y_convertir_imagen(imagen_ruta):
     if imagen_ruta and os.path.isfile(imagen_ruta):
