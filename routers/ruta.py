@@ -4,6 +4,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from database import database
 from models import RutaLecturaMovilResult, Ruta, LectorRutaDetail, ActualizarLectorRuta
 from routers.auth import get_current_user
+import asyncpg.exceptions
+
 
 router = APIRouter()
 
@@ -80,6 +82,10 @@ async def get_lectorruta(username: str, id_ruta: int, current_user: dict = Depen
             nombre_usuario=result["nombre_usuario"],
             id_ruta=result["id_ruta"],
             nombre_ruta=result["nombre_ruta"]
+        )
+    except asyncpg.exceptions.RaiseError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
     except SQLAlchemyError as e:
         raise HTTPException(

@@ -7,10 +7,10 @@ from routers.auth import get_current_user
 
 router = APIRouter()
 
-@router.get("/usuario_ruta/{usuario_id}", response_model=list[UsuarioRutaResult])
-async def obtener_ruta_usuario(usuario_id: int, current_user: dict = Depends(get_current_user)):
-    query = "SELECT * FROM UsuarioRuta(:usuario_id)"
-    values = {"usuario_id": int(usuario_id)}  # Asegurando que el valor se pase como string
+@router.get("/usuario_ruta/{login}", response_model=list[UsuarioRutaResult])
+async def obtener_ruta_usuario(login: str, current_user: dict = Depends(get_current_user)):
+    query = "SELECT * FROM UsuarioRuta(:login)"
+    values = {"login": str(login)}  # Asegurando que el valor se pase como string
     
     try:
         # Ejecuta la consulta pasando el parámetro correctamente

@@ -393,7 +393,7 @@ BEGIN
     SELECT 
         alr.login AS login_usuario,
         ar.id AS id_ruta,
-        cl.nombre || ' ' || cl.apellido AS nombre_usuario,  -- Concatena nombre y apellido
+        (cl.nombre || ' ' || cl.apellido)::VARCHAR AS nombre_usuario,  -- Concatena nombre y apellido y convierte a VARCHAR
         ar.nombre AS nombre_ruta
     FROM 
         aapplectorruta alr
@@ -412,10 +412,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+
 -- Función para obtener información de acometidas relacionadas con el login del usuario
 CREATE OR REPLACE FUNCTION RutaLecturaMovil(p_login VARCHAR(255))
 RETURNS TABLE (
-    id_usuario INTEGER,
     id_ruta INTEGER,
     numcuenta VARCHAR(255),
     no_medidor VARCHAR(255),
@@ -427,7 +427,6 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT
-        usu.id AS id_usuario,
         b.id AS id_ruta,
         a.numcuenta,
         a.no_medidor,
@@ -435,11 +434,11 @@ BEGIN
         a.ruta,
         a.direccion,
         COALESCE(
-            (SELECT CONCAT(ciud.Nombre, ' ', ciud.Apellido)
+            (SELECT CONCAT(ciud.Nombre, ' ', ciud.Apellido)::VARCHAR
              FROM aapplectura aplect
              INNER JOIN vct002 ciud ON aplect.ciu = ciud.numide_d AND aplect.numcuenta = a.numcuenta
              LIMIT 1),
-            (SELECT appmov.abonado 
+            (SELECT appmov.abonado::VARCHAR 
              FROM aappMovilLectura appmov
              WHERE appmov.cuenta = a.numcuenta
              LIMIT 1)
@@ -493,21 +492,20 @@ $$ LANGUAGE plpgsql;
 -- Función para obtener todos los usuarios
 CREATE OR REPLACE FUNCTION ObtenerUsuarios()
 RETURNS TABLE (
-    id INTEGER,
     login VARCHAR
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT u.id, u.login
+    SELECT u.login 
     FROM csebase1 u;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION UsuarioRuta(p_idusuario INTEGER)
+
+CREATE OR REPLACE FUNCTION UsuarioRuta(p_login VARCHAR)
 RETURNS TABLE (
   nombre_ruta VARCHAR(255),
   login VARCHAR(255),
-  id_usuario INTEGER,
   id_ruta INTEGER
 ) AS $$
 BEGIN
@@ -515,11 +513,10 @@ BEGIN
   SELECT 
     ap.nombre AS nombre_ruta, 
     usu.login AS login, 
-    usu.id AS id_usuario, 
     ap.id AS id_ruta
   FROM aapplectorruta apl 
   INNER JOIN aappbario ap ON apl.ruta = ap.nombre
   INNER JOIN csebase1 usu ON apl.login = usu.login
-  WHERE usu.id = p_idusuario;
+  WHERE usu.login = p_login;
 END;
 $$ LANGUAGE plpgsql;

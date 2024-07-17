@@ -14,7 +14,7 @@ BEGIN
     SELECT 
         alr.login AS login_usuario,
         ar.id AS id_ruta,
-        cl.nombre || ' ' || cl.apellido AS nombre_usuario,  -- Concatena nombre y apellido
+        (cl.nombre || ' ' || cl.apellido)::VARCHAR AS nombre_usuario,  -- Concatena nombre y apellido y convierte a VARCHAR
         ar.nombre AS nombre_ruta
     FROM 
         aapplectorruta alr

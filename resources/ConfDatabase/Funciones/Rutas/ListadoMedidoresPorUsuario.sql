@@ -1,7 +1,6 @@
 -- Función para obtener información de acometidas relacionadas con el login del usuario
 CREATE OR REPLACE FUNCTION RutaLecturaMovil(p_login VARCHAR(255))
 RETURNS TABLE (
-    id_usuario INTEGER,
     id_ruta INTEGER,
     numcuenta VARCHAR(255),
     no_medidor VARCHAR(255),
@@ -13,7 +12,6 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT
-        usu.id AS id_usuario,
         b.id AS id_ruta,
         a.numcuenta,
         a.no_medidor,
@@ -21,11 +19,11 @@ BEGIN
         a.ruta,
         a.direccion,
         COALESCE(
-            (SELECT CONCAT(ciud.Nombre, ' ', ciud.Apellido)
+            (SELECT CONCAT(ciud.Nombre, ' ', ciud.Apellido)::VARCHAR
              FROM aapplectura aplect
              INNER JOIN vct002 ciud ON aplect.ciu = ciud.numide_d AND aplect.numcuenta = a.numcuenta
              LIMIT 1),
-            (SELECT appmov.abonado 
+            (SELECT appmov.abonado::VARCHAR 
              FROM aappMovilLectura appmov
              WHERE appmov.cuenta = a.numcuenta
              LIMIT 1)

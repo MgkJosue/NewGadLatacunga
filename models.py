@@ -9,11 +9,9 @@ class LoginCredentials(BaseModel):
 class UsuarioRutaResult(BaseModel):
     nombre_ruta: str
     login: str
-    id_usuario: int
     id_ruta: int
 
 class RutaLecturaMovilResult(BaseModel):
-    id_usuario: int
     id_ruta: int
     numcuenta: str
     no_medidor: str
