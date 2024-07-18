@@ -2,11 +2,11 @@
 SELECT validar_usuario('usuario1', 'contrasena1');
 
 --Probar sp UsuarioRutaSp
--- Obtener la ruta asignada a ese id del usuario 
-SELECT * FROM UsuarioRuta(1); 
+-- Obtener informacion de rutas relacionadas con loguin del usuario
+SELECT * FROM UsuarioRuta('jalvarez'); 
 
 --Probar SpRutaLecturaMovilz
--- Obtener informacion de acometidas relacionadas con id del usuario
+-- Obtener informacion de rutas relacionadas con loguin del usuario
 SELECT * FROM RutaLecturaMovil('jalvarez');
 
 --Probar spSincronizarLecturas
@@ -37,36 +37,31 @@ SELECT * FROM ObtenerUsuarios();
 --Funcion para obtenerRutas
 SELECT * FROM ObtenerRutas();
 
--- Asignar la ruta con ID 1 al usuario con ID 5
-SELECT AsignarRutaAUsuario(1, 4);
+-- Asignar la ruta con ID a  usuario logueado
+SELECT AsignarRutaAUsuario('jalvarez', 4);
 
 
 --Obtener los datos de la tabla aapplectorruta junto con el nombre de usuario y el nombre de la ruta
 SELECT * FROM obtener_datos_lectorruta();
 
---Eliminar la asignación de la ruta con ID 1 a la tabla aapplectorruta
-SELECT eliminar_lectorruta(1);
+--Eliminar los datos de la tabla aapplectorruta
+SELECT eliminar_lectorruta('jalvarez', 1);
 
---Obtener los datos de la ID Lector Ruta 1
-SELECT * FROM  obtener_lectorruta(1);
+--Obtener los datos de la tabla aapplectorruta junto con el nombre de usuario y el nombre de la ruta
+SELECT * FROM  obtener_lectorruta('jalvarez', 2);
 
 
 -- Para ejecutar el procedimiento almacenado
 SELECT copiar_registros_a_evidencia();
 
-
-
---AUN NO IMPLEMENTADO 
 --Tabalas temporales entre appmovillecturas y tabla lecturas 
 SELECT crear_tablas_temporales();
 
 --Actualizar e insertar lecturas en la tabla aapplectura desde la tabla temporal
 SELECT actualizar_insertar_lecturas();
 
--- Verificar actualizaciones en aapplectura
-SELECT * FROM aapplectura WHERE numcuenta IN ('12345', '67890');
+-- Llamar al procedimiento almacenado sin parámetros para utilizar los valores por defecto
+SELECT * FROM obtener_datos_consumo();
 
--- Verificar inserciones en aapplectura
-SELECT * FROM aapplectura WHERE numcuenta = '11111';
-
-
+-- Llamar al procedimiento almacenado con parámetros específicos
+SELECT * FROM obtener_datos_consumo('2024-06-30', 10, 1.5);
