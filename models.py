@@ -53,7 +53,7 @@ class ActualizarLectorRuta(BaseModel):
     new_id_ruta: int
 
 
-class DatosConsumoRequest(BaseModel):
-    fecha_consulta: Optional[str] = Field(None, description="Fecha de consulta en formato 'YYYY-MM-DD'. Por defecto, se utiliza la fecha actual.")
-    limite_registros: Optional[int] = Field(None, description="Número máximo de registros a devolver. Por defecto, no hay límite.")
-    rango_unidades: Optional[float] = Field(2, description="Rango de unidades para calcular los límites superior e inferior del consumo promedio. Por defecto, se utiliza 2.")
+class LecturaRequest(BaseModel):
+    nueva_lectura: str
+    nueva_observacion: Optional[str] = None
+    nuevo_motivo: Optional[str] = None

@@ -3,11 +3,12 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from database import database
 from typing import List, Optional
-from models import Lectura, DatosConsumoRequest
+from models import Lectura, LecturaRequest
 from routers.auth import get_current_user
 import base64
 import os
 import datetime 
+from asyncpg.exceptions import RaiseError, PostgresError
 
 router = APIRouter()
 
@@ -141,6 +142,108 @@ async def obtener_datos_consumo(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Error: " + str(e)
         ) from e
+
+@router.put("/lecturas/{cuenta}")
+async def editar_lectura_movil(
+    cuenta: str, 
+    lectura: LecturaRequest, 
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        # Validar parámetros de entrada
+        if not cuenta or not lectura.nueva_lectura:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La cuenta y la nueva lectura son requeridas"
+            )
+
+        query = text("""
+            SELECT editar_lectura_movil(:cuenta, :nueva_lectura, :nueva_observacion, :nuevo_motivo);
+        """).bindparams(
+            cuenta=cuenta,
+            nueva_lectura=lectura.nueva_lectura,
+            nueva_observacion=lectura.nueva_observacion,
+            nuevo_motivo=lectura.nuevo_motivo
+        )
+
+        result = await database.fetch_one(query)
+
+        if result is None or not result[0]:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No se encontró una lectura móvil para la cuenta especificada"
+            )
+
+        return {"mensaje": "Lectura móvil actualizada correctamente"}
+    
+    except RaiseError as e:
+        # Capturar errores específicos del procedimiento almacenado
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        ) from e
+    
+    except SQLAlchemyError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error en la base de datos: " + str(e)
+        ) from e
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error desconocido: " + str(e)
+        ) from e
+    
+
+@router.delete("/lecturas/{cuenta}")
+async def eliminar_lectura_movil(
+    cuenta: str, 
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        # Validar parámetros de entrada
+        if not cuenta:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La cuenta es requerida"
+            )
+
+        query = text("""
+            SELECT eliminar_lectura_movil(:cuenta);
+        """).bindparams(
+            cuenta=cuenta
+        )
+
+        result = await database.fetch_one(query)
+
+        if result is None or not result[0]:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No se encontró una lectura móvil para la cuenta especificada"
+            )
+
+        return {"mensaje": "Lectura móvil eliminada correctamente"}
+    
+    except PostgresError as e:
+        # Capturar errores específicos del procedimiento almacenado
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        ) from e
+    
+    except SQLAlchemyError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error en la base de datos: " + str(e)
+        ) from e
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error desconocido: " + str(e)
+        ) from e
+
 
 def leer_y_convertir_imagen(imagen_ruta):
     if imagen_ruta and os.path.isfile(imagen_ruta):

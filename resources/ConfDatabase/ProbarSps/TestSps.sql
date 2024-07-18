@@ -65,3 +65,10 @@ SELECT * FROM obtener_datos_consumo();
 
 -- Llamar al procedimiento almacenado con parámetros específicos
 SELECT * FROM obtener_datos_consumo('2024-06-30', 10, 1.5);
+
+
+--Funcion para poder editar la lectura movil
+SELECT editar_lectura_movil('11111', '225', 'Lectura corregida', 'Cambio de medidor');
+
+--Funcion para poder eliminar la lectura movil
+SELECT eliminar_lectura_movil('33333');
