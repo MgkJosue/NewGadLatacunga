@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, validator
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class LoginCredentials(BaseModel):
     nombre_usuario: str
@@ -40,17 +40,36 @@ class Token(BaseModel):
 class Ruta(BaseModel):
     ruta_id: int
     username: str
+    fecha: datetime
+
+    @validator('fecha')
+    def validar_fecha(cls, v):
+        hoy = datetime.today().date()
+        mañana = hoy + timedelta(days=1)
+        if v.date() not in [hoy, mañana]:
+            raise ValueError("La fecha debe ser la actual o la del próximo día.")
+        return v
 
 class LectorRutaDetail(BaseModel):
     login_usuario: str
     nombre_usuario: str
     id_ruta: int
     nombre_ruta: str
+    fecha: datetime
 
 
 class ActualizarLectorRuta(BaseModel):
     new_username: str
     new_id_ruta: int
+    fecha: datetime
+
+    @validator('fecha')
+    def validar_fecha(cls, v):
+        hoy = datetime.today().date()
+        mañana = hoy + timedelta(days=1)
+        if v.date() not in [hoy, mañana]:
+            raise ValueError("La fecha debe ser la actual o la del próximo día.")
+        return v
 
 
 class LecturaRequest(BaseModel):

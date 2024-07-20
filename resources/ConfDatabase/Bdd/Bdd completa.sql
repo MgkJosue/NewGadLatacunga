@@ -75,8 +75,11 @@ CREATE TABLE aappMovilLectura (
     motivo TEXT,
     imagen BYTEA,
     fecha_hora_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_hora_edicion TIMESTAMP 
+    fecha_hora_edicion TIMESTAMP,
+    modificado_por VARCHAR(50)
 );
+-- MODIFICADO POR(LOGIN DEL QUE HACE LA EDICION) LA PERSONA QUE MDOFICA EL REGISTRO 
+
 
 
 -- Crear la tabla aapEvidencia para la actualización de los datos de la tabla aapMovilLectura 
@@ -92,7 +95,12 @@ CREATE TABLE aappEvidencia (
     direccion VARCHAR(255),
     motivo TEXT,
     imagen BYTEA,
-    fecha_hora_registro TIMESTAMP ,
+    fecha_hora_registro TIMESTAMP,
     fecha_hora_edicion TIMESTAMP,
+    modificado_por VARCHAR(50),
+    procesado_por VARCHAR(50),
+    fecha_de_procesamiento TIMESTAMP,
+    accion VARCHAR(20),
     CONSTRAINT unique_cuenta_medidor UNIQUE (cuenta, medidor)
 );
+-- MODIFICADO POR, PROCESADO POR, FECHA DE PROCESAMIENTO, ACCION(Eliminado)

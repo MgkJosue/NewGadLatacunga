@@ -81,14 +81,15 @@ BEGIN
                 coordenadasXYZ = v_lectura.coordenadasXYZ,
                 motivo = COALESCE(v_lectura.motivo, motivo),
                 imagen = COALESCE(v_lectura.imagen, imagen),
-                fecha_hora_edicion = v_lectura.fecha_actualizacion
+                fecha_hora_edicion = v_lectura.fecha_actualizacion,
+                modificado_por = p_login_usuario
             WHERE cuenta = v_lectura.numcuenta
               AND EXTRACT(YEAR FROM fecha_hora_registro) = v_anio
               AND EXTRACT(MONTH FROM fecha_hora_registro) = v_mes;
         ELSE
             -- Insertar una nueva lectura (manteniendo la dirección y abonado)
-            INSERT INTO aappmovillectura (cuenta, medidor, clave, abonado, lectura, observacion, coordenadasXYZ, direccion, motivo, imagen, fecha_hora_registro)
-            VALUES (v_lectura.numcuenta, v_lectura.no_medidor, v_lectura.clave, v_abonado, v_lectura.lectura, v_lectura.observacion, v_lectura.coordenadasXYZ, v_direccion, v_lectura.motivo, v_lectura.imagen, CURRENT_TIMESTAMP);
+            INSERT INTO aappmovillectura (cuenta, medidor, clave, abonado, lectura, observacion, coordenadasXYZ, direccion, motivo, imagen, fecha_hora_registro, modificado_por)
+            VALUES (v_lectura.numcuenta, v_lectura.no_medidor, v_lectura.clave, v_abonado, v_lectura.lectura, v_lectura.observacion, v_lectura.coordenadasXYZ, v_direccion, v_lectura.motivo, v_lectura.imagen, CURRENT_TIMESTAMP, p_login_usuario);
         END IF;
     END LOOP;
 END;

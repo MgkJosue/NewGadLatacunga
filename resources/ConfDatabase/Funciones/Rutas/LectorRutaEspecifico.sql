@@ -7,7 +7,8 @@ RETURNS TABLE (
     login_usuario VARCHAR,
     id_ruta INT,
     nombre_usuario VARCHAR,
-    nombre_ruta VARCHAR
+    nombre_ruta VARCHAR,
+    fecha TIMESTAMP  -- Agregar el campo fecha aquí
 ) AS $$
 BEGIN
     RETURN QUERY
@@ -15,7 +16,8 @@ BEGIN
         alr.login AS login_usuario,
         ar.id AS id_ruta,
         (cl.nombre || ' ' || cl.apellido)::VARCHAR AS nombre_usuario,  -- Concatena nombre y apellido y convierte a VARCHAR
-        ar.nombre AS nombre_ruta
+        ar.nombre AS nombre_ruta,
+        alr.fecha  -- Agregar el campo fecha aquí
     FROM 
         aapplectorruta alr
     JOIN 

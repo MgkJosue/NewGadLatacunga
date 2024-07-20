@@ -46,10 +46,11 @@ async def obtener_lectorruta(current_user: dict = Depends(get_current_user)):
 async def asignar_ruta_a_usuario(asignacion: Ruta, current_user: dict = Depends(get_current_user)):
     try:
         query = text("""
-            SELECT AsignarRutaAUsuario(:username, :ruta_id) AS mensaje;
+            SELECT AsignarRutaAUsuario(:username, :ruta_id, :fecha) AS mensaje;
         """).bindparams(
             bindparam("ruta_id", asignacion.ruta_id),
-            bindparam("username", asignacion.username)
+            bindparam("username", asignacion.username),
+            bindparam("fecha", asignacion.fecha.date())  # Asegúrate de pasar solo la fecha sin la hora
         )
         
         result = await database.fetch_one(query)
@@ -65,7 +66,6 @@ async def asignar_ruta_a_usuario(asignacion: Ruta, current_user: dict = Depends(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
         ) from e
-    
 
 @router.get("/lectorruta/{username}/{id_ruta}", response_model=LectorRutaDetail)
 async def get_lectorruta(username: str, id_ruta: int, current_user: dict = Depends(get_current_user)):
@@ -81,7 +81,8 @@ async def get_lectorruta(username: str, id_ruta: int, current_user: dict = Depen
             login_usuario=result["login_usuario"],
             nombre_usuario=result["nombre_usuario"],
             id_ruta=result["id_ruta"],
-            nombre_ruta=result["nombre_ruta"]
+            nombre_ruta=result["nombre_ruta"],
+            fecha=result["fecha"]
         )
     except asyncpg.exceptions.RaiseError as e:
         raise HTTPException(
@@ -111,12 +112,13 @@ async def eliminar_lectorruta(username: str, id_ruta: int, current_user: dict = 
 async def actualizar_lectorruta(username: str, id_ruta: int, detalles: ActualizarLectorRuta, current_user: dict = Depends(get_current_user)):
     try:
         query = text("""
-            SELECT actualizar_lectorruta(:username, :id_ruta, :new_username, :new_id_ruta) AS mensaje;
+            SELECT actualizar_lectorruta(:username, :id_ruta, :new_username, :new_id_ruta, :fecha) AS mensaje;
         """).bindparams(
             bindparam("username", username),
             bindparam("id_ruta", id_ruta),
             bindparam("new_username", detalles.new_username),
-            bindparam("new_id_ruta", detalles.new_id_ruta)
+            bindparam("new_id_ruta", detalles.new_id_ruta),
+            bindparam("fecha", detalles.fecha.date())  # Asegúrate de pasar solo la fecha sin la hora
         )
         
         result = await database.fetch_one(query)

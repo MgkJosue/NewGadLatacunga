@@ -1,11 +1,11 @@
-=CREATE OR REPLACE FUNCTION actualizar_lectorruta(
+CREATE OR REPLACE FUNCTION actualizar_lectorruta(
     p_login VARCHAR,
     p_idruta INT,
     new_login VARCHAR,
-    new_idruta INT
+    new_idruta INT,
+    p_fecha DATE
 ) RETURNS TEXT AS $$
 DECLARE
-    existing_record_id INTEGER;
     user_name VARCHAR(255);
     route_name VARCHAR(255);
     mensaje TEXT;
@@ -27,6 +27,12 @@ BEGIN
         RETURN mensaje;
     END IF;
 
+    -- Validar la fecha
+    IF p_fecha <> CURRENT_DATE AND p_fecha <> CURRENT_DATE + INTERVAL '1 day' THEN
+        mensaje := 'La fecha debe ser la actual o la del próximo día.';
+        RETURN mensaje;
+    END IF;
+
     -- Obtener el nombre del usuario
     SELECT nombre INTO user_name FROM csebase1 WHERE login = new_login;
 
@@ -39,9 +45,9 @@ BEGIN
         RETURN mensaje;
     END IF;
 
-    -- Actualizar el registro en la tabla aapplectorruta
+    -- Actualizar el registro en la tabla aapplectorruta con la nueva fecha
     UPDATE aapplectorruta
-    SET login = new_login, ruta = (SELECT nombre FROM aappbario WHERE id = new_idruta)
+    SET login = new_login, ruta = (SELECT nombre FROM aappbario WHERE id = new_idruta), fechatoma = p_fecha
     WHERE login = p_login AND ruta = (SELECT nombre FROM aappbario WHERE id = p_idruta);
 
     mensaje := format('Registro con login %s y ID de ruta %s actualizado correctamente. Nueva ruta %s asignada al usuario %s.', p_login, p_idruta, route_name, user_name);

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Query
-from sqlalchemy import text
+from sqlalchemy import text, bindparam
 from sqlalchemy.exc import SQLAlchemyError
 from database import database
 from typing import List, Optional
@@ -242,6 +242,32 @@ async def eliminar_lectura_movil(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error desconocido: " + str(e)
+        ) from e
+
+@router.get("/lecturas/{cuenta}", response_model=dict)
+async def obtener_lectura_por_cuenta(cuenta: str, current_user: dict = Depends(get_current_user)):
+    try:
+        query = text("""
+            SELECT * FROM obtener_datos_por_cuenta(:cuenta);
+        """).bindparams(
+            bindparam("cuenta", cuenta)
+        )
+        
+        result = await database.fetch_one(query)
+        
+        if result:
+            # Convertir el resultado a un diccionario y convertir el campo imagen a base64
+            row_dict = dict(result)
+            if 'imagen' in row_dict and row_dict['imagen'] is not None:
+                row_dict['imagen'] = base64.b64encode(row_dict['imagen']).decode('utf-8')
+            return row_dict
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No se encontró la lectura para la cuenta especificada"
+            )
+    except SQLAlchemyError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos: " + str(e)
         ) from e
 
 
