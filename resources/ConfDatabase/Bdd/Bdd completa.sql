@@ -104,3 +104,13 @@ CREATE TABLE aappEvidencia (
     CONSTRAINT unique_cuenta_medidor UNIQUE (cuenta, medidor)
 );
 -- MODIFICADO POR, PROCESADO POR, FECHA DE PROCESAMIENTO, ACCION(Eliminado)
+
+CREATE TABLE IF NOT EXISTS temp_cambios_lectura (
+    id SERIAL PRIMARY KEY,
+    cuenta VARCHAR(20),
+    medidor VARCHAR(20),
+    accion VARCHAR(20),
+    datos JSONB,
+    modificado_por VARCHAR(50),
+    fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
