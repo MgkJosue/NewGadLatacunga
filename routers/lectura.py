@@ -13,17 +13,17 @@ from asyncpg.exceptions import RaiseError, PostgresError
 router = APIRouter()
 
 @router.post("/sincronizar_lecturas/{login}")
-async def sincronizar_lecturas(login: str, lecturas: List[Lectura], current_user: dict = Depends(get_current_user)):
+async def sincronizar_lecturas(
+    login: str, 
+    lecturas: List[Lectura], 
+    current_user: dict = Depends(get_current_user)
+):
     try:
         formatted_lecturas = []
         for lectura in lecturas:
             motivo = f"'{lectura.motivo}'" if lectura.motivo is not None else 'NULL'
             
-            imagen_base64 = leer_y_convertir_imagen(lectura.imagen_ruta)
-            if imagen_base64:
-                imagen = f"decode('{imagen_base64}', 'base64')"
-            else:
-                imagen = 'NULL'
+            imagen = f"decode('{lectura.imagen_ruta}', 'base64')" if lectura.imagen_ruta else 'NULL'
             
             fecha_actualizacion = f"'{lectura.fecha_actualizacion}'" if lectura.fecha_actualizacion is not None else 'NULL'
             
@@ -50,16 +50,27 @@ async def sincronizar_lecturas(login: str, lecturas: List[Lectura], current_user
         ) from e
 
 
-@router.post("/copiar_evidencia")
-async def copiar_evidencia(current_user: dict = Depends(get_current_user)):
+@router.post("/lecturas/copiar-evidencias")
+async def copiar_evidencias(current_user: dict = Depends(get_current_user)):
     try:
-        query = text("SELECT copiar_registros_a_evidencia();")
-        await database.execute(query)
-        return {"mensaje": "Registros copiados a aapEvidencia exitosamente"}
+        query = text("SELECT * FROM copiar_a_evidencia_masivo_con_temporal(:procesado_por);").bindparams(
+            procesado_por=current_user['username']
+        )
+        results = await database.fetch_all(query)
+
+        if not results:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="No se obtuvieron resultados del procedimiento almacenado"
+            )
+
+        return {"mensaje": "Registros copiados a aappEvidencia exitosamente", "resultados": results}
     except SQLAlchemyError as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error en la base de datos: " + str(e)
         ) from e
+
 
 
 @router.post("/actualizar_lecturas")
@@ -150,34 +161,34 @@ async def editar_lectura_movil(
     current_user: dict = Depends(get_current_user)
 ):
     try:
-        # Validar parámetros de entrada
-        if not cuenta or not lectura.nueva_lectura:
+        if not cuenta.strip() or not lectura.nueva_lectura.strip():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="La cuenta y la nueva lectura son requeridas"
+                detail="La cuenta y la nueva lectura no pueden estar vacías"
             )
 
         query = text("""
-            SELECT editar_lectura_movil(:cuenta, :nueva_lectura, :nueva_observacion, :nuevo_motivo);
+            SELECT editar_lectura_movil(:cuenta, :nueva_lectura, :nueva_observacion, :nuevo_motivo, :modificado_por);
         """).bindparams(
             cuenta=cuenta,
             nueva_lectura=lectura.nueva_lectura,
             nueva_observacion=lectura.nueva_observacion,
-            nuevo_motivo=lectura.nuevo_motivo
+            nuevo_motivo=lectura.nuevo_motivo,
+            modificado_por=current_user['username']  
         )
 
         result = await database.fetch_one(query)
 
+        
         if result is None or not result[0]:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No se encontró una lectura móvil para la cuenta especificada"
+                detail="No se pudo actualizar la lectura móvil"
             )
 
         return {"mensaje": "Lectura móvil actualizada correctamente"}
     
     except RaiseError as e:
-        # Capturar errores específicos del procedimiento almacenado
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
@@ -194,7 +205,6 @@ async def editar_lectura_movil(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error desconocido: " + str(e)
         ) from e
-    
 
 @router.delete("/lecturas/{cuenta}")
 async def eliminar_lectura_movil(
@@ -202,25 +212,32 @@ async def eliminar_lectura_movil(
     current_user: dict = Depends(get_current_user)
 ):
     try:
-        # Validar parámetros de entrada
-        if not cuenta:
+        # Mejorar la validación de entrada
+        if not cuenta.strip():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="La cuenta es requerida"
+                detail="La cuenta es requerida y no puede estar vacía"
             )
 
         query = text("""
-            SELECT eliminar_lectura_movil(:cuenta);
+            SELECT eliminar_lectura_movil(:cuenta, :modificado_por);
         """).bindparams(
-            cuenta=cuenta
+            cuenta=cuenta,
+            modificado_por=current_user['username']  # O el campo apropiado que identifique al usuario
         )
 
         result = await database.fetch_one(query)
 
-        if result is None or not result[0]:
+        # Manejar el resultado de la función más detalladamente
+        if result is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="No se obtuvo respuesta de la base de datos"
+            )
+        if not result[0]:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No se encontró una lectura móvil para la cuenta especificada"
+                detail="No se encontró una lectura móvil para la cuenta especificada o no se pudo eliminar"
             )
 
         return {"mensaje": "Lectura móvil eliminada correctamente"}
@@ -243,6 +260,7 @@ async def eliminar_lectura_movil(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error desconocido: " + str(e)
         ) from e
+
 
 @router.get("/lecturas/{cuenta}", response_model=dict)
 async def obtener_lectura_por_cuenta(cuenta: str, current_user: dict = Depends(get_current_user)):
