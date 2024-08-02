@@ -3,7 +3,7 @@ from sqlalchemy import text, bindparam
 from sqlalchemy.exc import SQLAlchemyError
 from database import database
 from typing import List, Optional
-from models import Lectura, LecturaRequest
+from models import Lectura, LecturaRequest, WebLecturaRequest
 from routers.auth import get_current_user
 import base64
 import os
@@ -289,8 +289,61 @@ async def obtener_lectura_por_cuenta(cuenta: str, current_user: dict = Depends(g
         ) from e
 
 
-def leer_y_convertir_imagen(imagen_ruta):
-    if imagen_ruta and os.path.isfile(imagen_ruta):
-        with open(imagen_ruta, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode('utf-8')
-    return None
+@router.post("/movil-lectura", response_model=dict)
+async def movil_lectura(
+    lectura_data: WebLecturaRequest, 
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        if not lectura_data.cuenta or not lectura_data.lectura or not lectura_data.observacion:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Faltan parámetros requeridos: cuenta, lectura y observacion son obligatorios"
+            )
+
+        query = text("""
+            SELECT llenar_aappMovilLectura(:cuenta, :lectura, :observacion);
+        """).bindparams(
+            cuenta=lectura_data.cuenta,
+            lectura=lectura_data.lectura,
+            observacion=lectura_data.observacion
+        )
+
+        result = await database.fetch_one(query)
+
+        if result is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="No se obtuvo respuesta de la base de datos"
+            )
+
+        mensaje = result[0]
+
+        if "ya existe" in mensaje:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=mensaje
+            )
+        elif "no existe" in mensaje:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=mensaje
+            )
+        elif "No se encontraron todos los datos" in mensaje:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=mensaje
+            )
+
+        return {"mensaje": mensaje}
+
+    except SQLAlchemyError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error en la base de datos: " + str(e)
+        ) from e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error: " + str(e)
+        ) from e

@@ -76,3 +76,9 @@ class LecturaRequest(BaseModel):
     nueva_lectura: str
     nueva_observacion: Optional[str] = None
     nuevo_motivo: Optional[str] = None
+
+
+class WebLecturaRequest(BaseModel):
+    cuenta: str
+    lectura: str
+    observacion: str
