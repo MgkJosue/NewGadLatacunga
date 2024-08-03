@@ -7,6 +7,7 @@ DECLARE
     v_accion VARCHAR;
     v_ultima_fecha_registro TIMESTAMP;
     v_nueva_fecha_registro TIMESTAMP;
+    v_registros_copiados INTEGER := 0;
 BEGIN
     -- Crear una tabla temporal para almacenar los resultados
     CREATE TEMPORARY TABLE IF NOT EXISTS resultado_temp (
@@ -57,7 +58,15 @@ BEGIN
             -- Insertar resultado en la tabla temporal
             INSERT INTO resultado_temp (cuenta_temp, medidor_temp, accion_temp, resultado_temp)
             VALUES (v_registro.cuenta, v_registro.medidor, 'COPIAR', TRUE);
+            
+            v_registros_copiados := v_registros_copiados + 1;
         END LOOP;
+
+        -- Si se copiaron registros con éxito, eliminar los datos de aappMovilLectura
+        IF v_registros_copiados > 0 THEN
+            DELETE FROM aappMovilLectura;
+            RAISE NOTICE 'Se eliminaron % registros de aappMovilLectura', v_registros_copiados;
+        END IF;
     ELSE
         -- Procesar solo los cambios de temp_cambios_lectura
         FOR v_registro IN SELECT * FROM temp_cambios_lectura LOOP
@@ -105,7 +114,16 @@ BEGIN
             -- Insertar resultado en la tabla temporal
             INSERT INTO resultado_temp (cuenta_temp, medidor_temp, accion_temp, resultado_temp)
             VALUES (v_cuenta, v_medidor, v_accion, TRUE);
+            
+            v_registros_copiados := v_registros_copiados + 1;
         END LOOP;
+
+        -- Si se copiaron registros con éxito, eliminar los datos procesados de aappMovilLectura
+        IF v_registros_copiados > 0 THEN
+            DELETE FROM aappMovilLectura
+            WHERE (cuenta, medidor) IN (SELECT cuenta, medidor FROM temp_cambios_lectura);
+            RAISE NOTICE 'Se eliminaron % registros de aappMovilLectura', v_registros_copiados;
+        END IF;
     END IF;
 
     -- Limpiar la tabla temporal después de procesar todos los cambios
