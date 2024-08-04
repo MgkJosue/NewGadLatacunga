@@ -96,6 +96,7 @@ async def obtener_datos_consumo(
     fecha_consulta: Optional[str] = Query(None, description="Fecha de consulta en formato 'YYYY-MM-DD'. Por defecto, se utiliza la fecha actual."),
     limite_registros: Optional[int] = Query(None, description="Número máximo de registros a devolver. Por defecto, no hay límite."),
     rango_unidades: Optional[float] = Query(2, description="Rango de unidades para calcular los límites superior e inferior del consumo promedio. Por defecto, se utiliza 2."),
+    limite_promedio: Optional[int] = Query(3, description="Número máximo de registros a considerar para calcular el promedio. Por defecto, se utiliza 3."),
     current_user: dict = Depends(get_current_user)
 ):
     try:
@@ -104,29 +105,28 @@ async def obtener_datos_consumo(
             fecha_consulta = datetime.datetime.strptime(fecha_consulta, "%Y-%m-%d").date()
 
         # Preparar la consulta para llamar al procedimiento almacenado
-        if fecha_consulta is None and limite_registros is None and rango_unidades == 2:
-            query_str = "SELECT * FROM obtener_datos_consumo();"
-            query = text(query_str)
-        else:
-            query_str = """
-            SELECT * FROM obtener_datos_consumo(
-                :fecha_consulta, 
-                :limite_registros, 
-                :rango_unidades
-            );
-            """
-            query = text(query_str).bindparams(
-                fecha_consulta=fecha_consulta,  
-                limite_registros=limite_registros,
-                rango_unidades=rango_unidades
-            )
+        query_str = """
+        SELECT * FROM obtener_datos_consumo(
+            :fecha_consulta, 
+            :limite_registros, 
+            :rango_unidades,
+            :limite_promedio
+        );
+        """
+        query = text(query_str).bindparams(
+            fecha_consulta=fecha_consulta,  
+            limite_registros=limite_registros,
+            rango_unidades=rango_unidades,
+            limite_promedio=limite_promedio
+        )
         
         # Imprimir la consulta y los valores para depuración
         print("Query:", query_str)
         print("Params:", {
             "fecha_consulta": fecha_consulta,
             "limite_registros": limite_registros,
-            "rango_unidades": rango_unidades
+            "rango_unidades": rango_unidades,
+            "limite_promedio": limite_promedio
         })
 
         result = await database.fetch_all(query)
