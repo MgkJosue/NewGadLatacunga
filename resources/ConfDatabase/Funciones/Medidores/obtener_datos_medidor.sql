@@ -8,10 +8,10 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT 
-        acometidas.no_medidor, 
-        acometidas.clave, 
-        ciudadano.Nombre || ' ' || ciudadano.Apellido AS abonado, 
-        acometidas.direccion
+        acometidas.no_medidor::VARCHAR, 
+        acometidas.clave::VARCHAR, 
+        (ciudadano.Nombre || ' ' || ciudadano.Apellido)::VARCHAR AS abonado, 
+        acometidas.direccion::VARCHAR
     FROM 
         aappcometidas acometidas
     JOIN 
