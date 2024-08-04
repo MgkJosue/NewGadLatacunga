@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from database import database
-from routers import auth, usuario, ruta, lectura
+from routers import auth, usuario, ruta, lectura, medidor
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi.responses import JSONResponse
 
@@ -26,3 +26,4 @@ app.include_router(auth.router)
 app.include_router(usuario.router)
 app.include_router(ruta.router)
 app.include_router(lectura.router)
+app.include_router(medidor.router)	
