@@ -62,7 +62,7 @@ CREATE TABLE aapplectura (
 
 --TABLAS LOCALES NO ESTAN EN EL MUNICIPIO
 -- Crear la tabla aapMovilLectura 
-CREATE TABLE aappMovilLectura (
+CREATE TABLE aappmovillectura (
     id SERIAL PRIMARY KEY,
     cuenta VARCHAR(20),
     medidor VARCHAR(20),
@@ -76,7 +76,8 @@ CREATE TABLE aappMovilLectura (
     imagen BYTEA,
     fecha_hora_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_hora_edicion TIMESTAMP,
-    modificado_por VARCHAR(50)
+    modificado_por VARCHAR(50),
+    creado_por VARCHAR(50)
 );
 -- MODIFICADO POR(LOGIN DEL QUE HACE LA EDICION) LA PERSONA QUE MDOFICA EL REGISTRO 
 
