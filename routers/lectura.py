@@ -100,8 +100,10 @@ async def obtener_datos_consumo(
     current_user: dict = Depends(get_current_user)
 ):
     try:
-        # Convertir fecha_consulta a un objeto de fecha si no es None
-        if fecha_consulta is not None:
+        # Si fecha_consulta es None, usar la fecha actual
+        if fecha_consulta is None:
+            fecha_consulta = datetime.date.today()
+        else:
             fecha_consulta = datetime.datetime.strptime(fecha_consulta, "%Y-%m-%d").date()
 
         # Preparar la consulta para llamar al procedimiento almacenado
@@ -118,16 +120,7 @@ async def obtener_datos_consumo(
             limite_registros=limite_registros,
             rango_unidades=rango_unidades,
             limite_promedio=limite_promedio
-        )
-        
-        # Imprimir la consulta y los valores para depuración
-        print("Query:", query_str)
-        print("Params:", {
-            "fecha_consulta": fecha_consulta,
-            "limite_registros": limite_registros,
-            "rango_unidades": rango_unidades,
-            "limite_promedio": limite_promedio
-        })
+        )   
 
         result = await database.fetch_all(query)
         

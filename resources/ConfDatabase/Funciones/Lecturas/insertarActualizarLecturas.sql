@@ -13,7 +13,7 @@ BEGIN
     -- Actualizar registros existentes en aapplectura usando la tabla temporal temp_actualizar
     UPDATE aapplectura al
     SET
-        lectura = tmp.lectura::INTEGER,
+        lectura = tmp.lectura::NUMERIC,
         observacion = tmp.observacion,
         nromedidor = tmp.medidor,
         lecturaanterior = COALESCE(
@@ -28,7 +28,7 @@ BEGIN
              LIMIT 1),
             0
         ),
-        consumo = GREATEST(tmp.lectura::INTEGER - COALESCE(
+        consumo = GREATEST(tmp.lectura::NUMERIC - COALESCE(
             (SELECT al_prev.lectura
              FROM aapplectura al_prev
              WHERE al_prev.numcuenta = tmp.cuenta
@@ -52,7 +52,7 @@ BEGIN
         tmp.cuenta,
         EXTRACT(YEAR FROM CURRENT_DATE) AS anio,
         EXTRACT(MONTH FROM CURRENT_DATE) AS mes,
-        tmp.lectura::INTEGER,
+        tmp.lectura::NUMERIC,
         tmp.observacion,
         COALESCE(
             (SELECT al_prev.lectura
@@ -66,7 +66,7 @@ BEGIN
              LIMIT 1),
             0
         ) AS lecturaanterior,
-        GREATEST(tmp.lectura::INTEGER - COALESCE(
+        GREATEST(tmp.lectura::NUMERIC - COALESCE(
             (SELECT al_prev.lectura
              FROM aapplectura al_prev
              WHERE al_prev.numcuenta = tmp.cuenta
