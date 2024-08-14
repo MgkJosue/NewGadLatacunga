@@ -115,3 +115,10 @@ CREATE TABLE IF NOT EXISTS temp_cambios_lectura (
     modificado_por VARCHAR(50),
     fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE parametros_consumo (
+    id SERIAL PRIMARY KEY,
+    limite_promedio INTEGER NOT NULL,
+    rango_unidades NUMERIC NOT NULL,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

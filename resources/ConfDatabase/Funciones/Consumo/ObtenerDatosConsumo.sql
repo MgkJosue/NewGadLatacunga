@@ -1,8 +1,6 @@
 CREATE OR REPLACE FUNCTION obtener_datos_consumo(
     fecha_consulta DATE DEFAULT CURRENT_DATE,
-    limite_registros INTEGER DEFAULT NULL,
-    rango_unidades NUMERIC DEFAULT 2,
-    limite_promedio INTEGER DEFAULT 3
+    limite_registros INTEGER DEFAULT NULL
 ) RETURNS TABLE (
     cuenta VARCHAR,
     medidor VARCHAR,
@@ -22,19 +20,23 @@ CREATE OR REPLACE FUNCTION obtener_datos_consumo(
     imagen BYTEA,
     registros_usados INTEGER
 ) AS $$
+DECLARE
+    v_limite_promedio INTEGER;
+    v_rango_unidades NUMERIC;
 BEGIN
+    -- Obtener los parámetros de la tabla
+    SELECT limite_promedio, rango_unidades
+    INTO v_limite_promedio, v_rango_unidades
+    FROM parametros_consumo
+    ORDER BY fecha_actualizacion DESC
+    LIMIT 1;
+
     -- Validaciones
     IF fecha_consulta > CURRENT_DATE THEN
         RAISE EXCEPTION 'La fecha de consulta no puede ser futura';
     END IF;
     IF limite_registros IS NOT NULL AND limite_registros <= 0 THEN
         RAISE EXCEPTION 'El límite de registros debe ser un número positivo';
-    END IF;
-    IF rango_unidades <= 0 THEN
-        RAISE EXCEPTION 'El rango de unidades debe ser un número positivo';
-    END IF;
-    IF limite_promedio <= 0 THEN
-        RAISE EXCEPTION 'El límite para el cálculo del promedio debe ser un número positivo';
     END IF;
     
     RETURN QUERY
@@ -53,11 +55,11 @@ BEGIN
         SELECT 
             numcuenta,
             ROUND(AVG(consumo_apl), 2)::NUMERIC(15,2) as promedio_consumo,
-            ROUND(AVG(consumo_apl) + rango_unidades, 2)::NUMERIC(15,2) as rango_superior,
-            ROUND(GREATEST(AVG(consumo_apl) - rango_unidades, 0), 2)::NUMERIC(15,2) as rango_inferior,
+            ROUND(AVG(consumo_apl) + v_rango_unidades, 2)::NUMERIC(15,2) as rango_superior,
+            ROUND(GREATEST(AVG(consumo_apl) - v_rango_unidades, 0), 2)::NUMERIC(15,2) as rango_inferior,
             COUNT(*) as registros_usados
         FROM ultimos_registros
-        WHERE rn <= limite_promedio
+        WHERE rn <= v_limite_promedio
         GROUP BY numcuenta
     ),
     diferencia_lecturas AS (
@@ -83,7 +85,7 @@ BEGIN
             WHEN dl.diferencia > p.rango_superior THEN 'Alto consumo'
             WHEN dl.diferencia < p.rango_inferior THEN 'Bajo consumo'
             WHEN dl.lectura_aplectura IS NULL THEN 'Pendiente de sincronizar'
-            WHEN p.registros_usados < limite_promedio THEN 'Advertencia: Promedio calculado con menos registros de los solicitados'
+            WHEN p.registros_usados < v_limite_promedio THEN 'Advertencia: Promedio calculado con menos registros de los solicitados'
             ELSE 'Normal'
         END::TEXT as observacion,
         dl.coordenadasXYZ::VARCHAR AS coordenadas, 

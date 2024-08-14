@@ -71,3 +71,7 @@ INSERT INTO aappMovilLectura (cuenta, medidor, clave, abonado, lectura, observac
 INSERT INTO aappMovilLectura (cuenta, medidor, clave, abonado, lectura, observacion, coordenadasXYZ, direccion) VALUES
 ('22222', 'M22222', 'CLAVE222', 'Pedro Sánchez', '4567', 'Sin novedad', '-0.123456,-78.654321,1500', 'Calle Nueva 222'),
 ('33333', 'M33333', 'CLAVE333', 'Juan Pérez', '7890', 'Lectura alta', '-0.654321,-78.123456,1500', 'Calle Principal 789');
+
+-- Insertar valores iniciales
+INSERT INTO parametros_consumo (limite_promedio, rango_unidades)
+VALUES (3, 2);

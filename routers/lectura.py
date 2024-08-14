@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends, Query
 from sqlalchemy import text, bindparam
 from sqlalchemy.exc import SQLAlchemyError
 from database import database
-from typing import List, Optional
+from typing import List
 from models import Lectura, LecturaRequest, WebLecturaRequest
 from routers.auth import get_current_user
 import base64
@@ -88,63 +88,6 @@ async def actualizar_lecturas(current_user: dict = Depends(get_current_user)):
     except SQLAlchemyError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos"
-        ) from e
-    
-
-@router.get("/lecturas")
-async def obtener_datos_consumo(
-    fecha_consulta: Optional[str] = Query(None, description="Fecha de consulta en formato 'YYYY-MM-DD'. Por defecto, se utiliza la fecha actual."),
-    limite_registros: Optional[int] = Query(None, description="Número máximo de registros a devolver. Por defecto, no hay límite."),
-    rango_unidades: Optional[float] = Query(2, description="Rango de unidades para calcular los límites superior e inferior del consumo promedio. Por defecto, se utiliza 2."),
-    limite_promedio: Optional[int] = Query(3, description="Número máximo de registros a considerar para calcular el promedio. Por defecto, se utiliza 3."),
-    current_user: dict = Depends(get_current_user)
-):
-    try:
-        # Si fecha_consulta es None, usar la fecha actual
-        if fecha_consulta is None:
-            fecha_consulta = datetime.date.today()
-        else:
-            fecha_consulta = datetime.datetime.strptime(fecha_consulta, "%Y-%m-%d").date()
-
-        # Preparar la consulta para llamar al procedimiento almacenado
-        query_str = """
-        SELECT * FROM obtener_datos_consumo(
-            :fecha_consulta, 
-            :limite_registros, 
-            :rango_unidades,
-            :limite_promedio
-        );
-        """
-        query = text(query_str).bindparams(
-            fecha_consulta=fecha_consulta,  
-            limite_registros=limite_registros,
-            rango_unidades=rango_unidades,
-            limite_promedio=limite_promedio
-        )   
-
-        result = await database.fetch_all(query)
-        
-        if not result:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No se encontraron registros.")
-        
-        # Convertir resultados a una lista de diccionarios y convertir datos binarios a base64
-        result_dicts = []
-        for row in result:
-            row_dict = dict(row)
-            if 'imagen' in row_dict and row_dict['imagen'] is not None:
-                row_dict['imagen'] = base64.b64encode(row_dict['imagen']).decode('utf-8')
-            result_dicts.append(row_dict)
-        
-        return result_dicts
-    except SQLAlchemyError as e:
-        print("SQLAlchemyError:", str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error en la base de datos: " + str(e)
-        ) from e
-    except Exception as e:
-        print("Exception:", str(e))
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Error: " + str(e)
         ) from e
 
 @router.put("/lecturas/{cuenta}")
