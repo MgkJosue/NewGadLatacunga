@@ -75,7 +75,7 @@ async def obtener_datos_consumo(
         if fecha_consulta is None:
             fecha_consulta = datetime.date.today()
         else:
-            fecha_consulta = datetime.datetime.strptime(fecha_consulta, "%Y-%m-%D").date()
+            fecha_consulta = datetime.datetime.strptime(fecha_consulta, "%Y-%m-%d").date()
 
         # Preparar la consulta para llamar al procedimiento almacenado
         query_str = """
