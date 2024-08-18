@@ -11,7 +11,7 @@ router = APIRouter()
 
 SECRET_KEY = "your_secret_key"  # Cambia esto a una clave segura y mantenla en secreto
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 120
+ACCESS_TOKEN_EXPIRE_MINUTES = 720
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 

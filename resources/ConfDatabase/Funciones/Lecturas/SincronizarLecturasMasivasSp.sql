@@ -59,6 +59,25 @@ BEGIN
         ORDER BY id DESC
         LIMIT 1;
 
+        -- Si no se encuentra abonado y dirección en aappmovillectura, obtenerlo de las otras tablas
+        IF v_abonado IS NULL OR v_direccion IS NULL THEN
+            SELECT 
+                COALESCE(
+                    (SELECT CONCAT(ciud.Nombre, ' ', ciud.Apellido)::VARCHAR
+                     FROM aapplectura aplect
+                     INNER JOIN vct002 ciud ON aplect.ciu = ciud.numide_d AND aplect.numcuenta = v_lectura.numcuenta
+                     LIMIT 1),
+                    (SELECT appmov.abonado::VARCHAR 
+                     FROM aappMovilLectura appmov
+                     WHERE appmov.cuenta = v_lectura.numcuenta
+                     LIMIT 1)
+                ) AS abonado,
+                a.direccion
+            INTO v_abonado, v_direccion
+            FROM aappcometidas a
+            WHERE a.numcuenta = v_lectura.numcuenta;
+        END IF;
+
         -- Calcular consumo SOLO si hay lectura anterior y es un valor numérico
         IF v_lectura_anterior IS NOT NULL AND v_lectura_anterior ~ '^[0-9]+$' THEN
             v_consumo := v_lectura.lectura::INTEGER - v_lectura_anterior::INTEGER;
@@ -82,6 +101,8 @@ BEGIN
                 motivo = COALESCE(v_lectura.motivo, motivo),
                 imagen = COALESCE(v_lectura.imagen, imagen),
                 fecha_hora_edicion = v_lectura.fecha_actualizacion,
+                abonado = v_abonado,
+                direccion = v_direccion,
                 creado_por = p_login_usuario
             WHERE cuenta = v_lectura.numcuenta
               AND EXTRACT(YEAR FROM fecha_hora_registro) = v_anio
