@@ -1,4 +1,3 @@
--- Función para obtener información de acometidas relacionadas con el login del usuario
 CREATE OR REPLACE FUNCTION RutaLecturaMovil(p_login VARCHAR(255))
 RETURNS TABLE (
     id_ruta INTEGER,
@@ -19,14 +18,36 @@ BEGIN
         a.ruta,
         a.direccion,
         COALESCE(
-            (SELECT CONCAT(ciud.Nombre, ' ', ciud.Apellido)::VARCHAR
+            -- Primera subconsulta: Intentar obtener el abonado desde aapplectura y vct002
+            (SELECT CONCAT(ciud.nombre, ' ', ciud.apellido)::VARCHAR
              FROM aapplectura aplect
-             INNER JOIN vct002 ciud ON aplect.ciu = ciud.numide_d AND aplect.numcuenta = a.numcuenta
+             INNER JOIN vct002 ciud ON aplect.ciu = ciud.numide_d
+             WHERE aplect.numcuenta = a.numcuenta
              LIMIT 1),
+             
+            -- Segunda subconsulta: Intentar obtener el abonado desde aappMovilLectura
             (SELECT appmov.abonado::VARCHAR 
              FROM aappMovilLectura appmov
              WHERE appmov.cuenta = a.numcuenta
-             LIMIT 1)
+             LIMIT 1),
+
+            -- Tercera subconsulta: Buscar directamente en vct002 cuando no se encuentre en las anteriores
+            (SELECT CONCAT(ciud.nombre, ' ', ciud.apellido)::VARCHAR
+             FROM vct002 ciud
+             WHERE ciud.numide_d = (
+                SELECT aplect.ciu 
+                FROM aapplectura aplect 
+                WHERE aplect.numcuenta = a.numcuenta 
+                LIMIT 1)
+             LIMIT 1),
+
+            -- Cuarta subconsulta: Buscar abonado según la dirección
+            (SELECT CONCAT(ciud.nombre, ' ', ciud.apellido)::VARCHAR
+             FROM vct002 ciud
+             WHERE ciud.direccion = a.direccion
+             LIMIT 1),
+
+            'No encontrado'
         ) AS abonado
     FROM aappcometidas a
     INNER JOIN aapplectorruta apl ON a.ruta = apl.ruta
